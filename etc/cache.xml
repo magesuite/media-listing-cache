@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Cache/etc/cache.xsd">
+    <type name="media_listing" translate="label,description" instance="MageSuite\MediaListingCache\Model\Cache\Type\MediaListing">
+        <label>Media listing</label>
+        <description>List of files from media/wysiwyg folder</description>
+    </type>
+</config>
