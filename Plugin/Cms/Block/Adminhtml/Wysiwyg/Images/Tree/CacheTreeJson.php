@@ -17,12 +17,13 @@ class CacheTreeJson
         $this->cache = $cache;
     }
 
-    public function aroundGetTreeJson(\Magento\Cms\Block\Adminhtml\Wysiwyg\Images\Tree $subject, callable $proceed) {
+    public function aroundGetTreeJson(\Magento\Cms\Block\Adminhtml\Wysiwyg\Images\Tree $subject, callable $proceed)
+    {
         $cacheKey = self::TREE_JSON_TAG;
 
         $json = $this->cache->load($cacheKey);
 
-        if($json == null) {
+        if ($json == null) {
             $json = $proceed();
 
             $this->cache->save($json, $cacheKey, [self::TREE_JSON_TAG], self::ONE_DAY);
