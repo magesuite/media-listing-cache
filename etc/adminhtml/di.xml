@@ -7,4 +7,7 @@
     <type name="Magento\Cms\Block\Adminhtml\Wysiwyg\Images\Tree">
         <plugin name="cache_tree_json" type="MageSuite\MediaListingCache\Plugin\Cms\Block\Adminhtml\Wysiwyg\Images\Tree\CacheTreeJson" sortOrder="10" />
     </type>
+    <type name="Magento\Cms\Controller\Adminhtml\Wysiwyg\Images\Thumbnail">
+        <plugin name="refresh_thumbnail_url" type="MageSuite\MediaListingCache\Plugin\Cms\Controller\Adminhtml\Wysiwyg\Images\Thumbnail" sortOrder="10" />
+    </type>
 </config>
