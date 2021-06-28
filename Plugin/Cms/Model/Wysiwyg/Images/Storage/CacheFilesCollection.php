@@ -13,23 +13,50 @@ class CacheFilesCollection
 
     const FILES_COLLECTION_TAG = 'files_collection';
 
-    public function __construct(\MageSuite\MediaListingCache\Model\Cache\Type\MediaListing $cache)
-    {
+    /**
+     * @var \Magento\Framework\Data\Collection\FilesystemFactory
+     */
+    protected $filesystemCollectionFactory;
+
+    /**
+     * @var \Magento\Framework\Serialize\SerializerInterface
+     */
+    protected $serializer;
+
+    /**
+     * @var \Magento\Framework\DataObjectFactory
+     */
+    protected $dataObjectFactory;
+
+    public function __construct(
+        \MageSuite\MediaListingCache\Model\Cache\Type\MediaListing $cache,
+        \Magento\Framework\Data\Collection\FilesystemFactory $filesystemCollectionFactory,
+        \Magento\Framework\Serialize\SerializerInterface $serializer,
+        \Magento\Framework\DataObjectFactory $dataObjectFactory
+    ) {
         $this->cache = $cache;
+        $this->filesystemCollectionFactory = $filesystemCollectionFactory;
+        $this->serializer = $serializer;
+        $this->dataObjectFactory = $dataObjectFactory;
     }
 
     public function aroundGetFilesCollection(\Magento\Cms\Model\Wysiwyg\Images\Storage $subject, callable $proceed, $path, $type = null)
     {
         $cacheKey = md5($path . $type);
 
-        $collection = $this->cache->load($cacheKey);
+        $collectionItemsData = $this->cache->load($cacheKey);
 
-        if ($collection == null) {
+        if ($collectionItemsData == null) {
             $collection = $proceed($path, $type);
 
-            $this->cache->save(serialize($collection), $cacheKey, [self::FILES_COLLECTION_TAG], self::ONE_DAY);
+            $this->cache->save(
+                $this->serializeCollectionItemsData($collection),
+                $cacheKey,
+                [self::FILES_COLLECTION_TAG],
+                self::ONE_DAY
+            );
         } else {
-            $collection = unserialize($collection);
+            $collection = $this->unserializeCollectionItemsData($collectionItemsData);
         }
 
         return $collection;
@@ -65,5 +92,32 @@ class CacheFilesCollection
         $this->cache->clean(\Zend_Cache::CLEANING_MODE_MATCHING_TAG, $tags);
 
         return $result;
+    }
+
+    protected function unserializeCollectionItemsData($serializedData)
+    {
+        /** @var \Magento\Framework\Data\Collection\Filesystem $collection */
+        $collection = $this->filesystemCollectionFactory->create();
+        $itemsData = $this->serializer->unserialize($serializedData);
+
+        foreach ($itemsData as $key => $value) {
+            $itemDataObject = $this->dataObjectFactory->create();
+            $itemDataObject->addData([
+                $key => $this->serializer->unserialize($value)
+            ]);
+            $collection->addItem($itemDataObject);
+        }
+
+        return $collection;
+    }
+
+    protected function serializeCollectionItemsData($collection)
+    {
+        $serializer = $this->serializer;
+        $items = array_map(function ($item) use ($serializer){
+            return $serializer->serialize($item->getData());
+        }, $collection->getItems());
+
+        return $serializer->serialize($items);
     }
 }
