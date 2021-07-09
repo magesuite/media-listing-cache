@@ -14,9 +14,9 @@ class CacheFilesCollection
     const FILES_COLLECTION_TAG = 'files_collection';
 
     /**
-     * @var \Magento\Framework\Data\Collection\FilesystemFactory
+     * @var \Magento\Framework\Data\CollectionFactory
      */
-    protected $filesystemCollectionFactory;
+    protected $collectionFactory;
 
     /**
      * @var \Magento\Framework\Serialize\SerializerInterface
@@ -30,12 +30,12 @@ class CacheFilesCollection
 
     public function __construct(
         \MageSuite\MediaListingCache\Model\Cache\Type\MediaListing $cache,
-        \Magento\Framework\Data\Collection\FilesystemFactory $filesystemCollectionFactory,
+        \Magento\Framework\Data\CollectionFactory $collectionFactory,
         \Magento\Framework\Serialize\SerializerInterface $serializer,
         \Magento\Framework\DataObjectFactory $dataObjectFactory
     ) {
         $this->cache = $cache;
-        $this->filesystemCollectionFactory = $filesystemCollectionFactory;
+        $this->collectionFactory = $collectionFactory;
         $this->serializer = $serializer;
         $this->dataObjectFactory = $dataObjectFactory;
     }
@@ -96,15 +96,13 @@ class CacheFilesCollection
 
     protected function unserializeCollectionItemsData($serializedData)
     {
-        /** @var \Magento\Framework\Data\Collection\Filesystem $collection */
-        $collection = $this->filesystemCollectionFactory->create();
+        /** @var \Magento\Framework\Data\Collection $collection */
+        $collection = $this->collectionFactory->create();
         $itemsData = $this->serializer->unserialize($serializedData);
 
-        foreach ($itemsData as $key => $value) {
+        foreach ($itemsData as $value) {
             $itemDataObject = $this->dataObjectFactory->create();
-            $itemDataObject->addData([
-                $key => $this->serializer->unserialize($value)
-            ]);
+            $itemDataObject->addData($this->serializer->unserialize($value));
             $collection->addItem($itemDataObject);
         }
 
