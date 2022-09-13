@@ -27,8 +27,7 @@ class CacheTreeJson
         \Magento\Framework\App\RequestInterface $request,
         \Magento\Cms\Helper\Wysiwyg\Images $imagesHelper,
         \MageSuite\MediaListingCache\Model\Cache\Type\MediaListing $cache
-    )
-    {
+    ) {
         $this->cache = $cache;
         $this->imagesHelper = $imagesHelper;
         $this->request = $request;
@@ -37,7 +36,7 @@ class CacheTreeJson
     public function aroundGetTreeJson(\Magento\Cms\Block\Adminhtml\Wysiwyg\Images\Tree $subject, callable $proceed)
     {
         $nodeName = $this->request->getParam($this->imagesHelper->getTreeNodeName());
-        $cacheKey = sprintf('%s_%s', self::TREE_JSON_TAG, md5($nodeName));
+        $cacheKey = sprintf('%s_%s', self::TREE_JSON_TAG, hash('md5', $nodeName));
 
         $json = $this->cache->load($cacheKey);
 
