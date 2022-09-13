@@ -4,20 +4,16 @@ namespace MageSuite\MediaListingCache\Plugin\Cms\Controller\Adminhtml\Wysiwyg\Im
 
 class Thumbnail
 {
-    /**
-     * @var \MageSuite\MediaListingCache\Model\Cache\Type\MediaListing
-     */
-    protected $cacheMediaListing;
+    protected \Magento\Framework\Event\ManagerInterface $eventManager;
 
-    public function __construct(\MageSuite\MediaListingCache\Model\Cache\Type\MediaListing $cacheMediaListing)
+    public function __construct(\Magento\Framework\Event\ManagerInterface $eventManager)
     {
-        $this->cacheMediaListing = $cacheMediaListing;
+        $this->eventManager = $eventManager;
     }
 
     public function afterExecute(\Magento\Cms\Controller\Adminhtml\Wysiwyg\Images\Thumbnail $subject, $result)
     {
-        $tags = [\MageSuite\MediaListingCache\Plugin\Cms\Model\Wysiwyg\Images\Storage\CacheFilesCollection::FILES_COLLECTION_TAG];
-        $this->cacheMediaListing->clean(\Zend_Cache::CLEANING_MODE_MATCHING_TAG, $tags);
+        $this->eventManager->dispatch('media_gallery_upload');
 
         return $result;
     }

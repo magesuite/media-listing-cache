@@ -4,51 +4,41 @@ namespace MageSuite\MediaListingCache\Plugin\Cms\Model\Wysiwyg\Images\Storage;
 
 class CacheFilesCollection
 {
-    /**
-     * @var \MageSuite\MediaListingCache\Model\Cache\Type\MediaListing
-     */
-    protected $cache;
-
     const ONE_DAY = 86400;
 
     const FILES_COLLECTION_TAG = 'files_collection';
 
-    /**
-     * @var \Magento\Framework\Data\CollectionFactory
-     */
-    protected $collectionFactory;
+    protected \MageSuite\MediaListingCache\Model\Cache\Type\MediaListing $cache;
 
-    /**
-     * @var \Magento\Framework\Serialize\SerializerInterface
-     */
-    protected $serializer;
+    protected \Magento\Framework\Data\CollectionFactory $collectionFactory;
 
-    /**
-     * @var \Magento\Framework\DataObjectFactory
-     */
-    protected $dataObjectFactory;
+    protected \Magento\Framework\Serialize\SerializerInterface $serializer;
+
+    protected \Magento\Framework\DataObjectFactory $dataObjectFactory;
+
+    protected \Magento\Framework\Event\ManagerInterface $eventManager;
 
     public function __construct(
         \MageSuite\MediaListingCache\Model\Cache\Type\MediaListing $cache,
         \Magento\Framework\Data\CollectionFactory $collectionFactory,
         \Magento\Framework\Serialize\SerializerInterface $serializer,
-        \Magento\Framework\DataObjectFactory $dataObjectFactory
+        \Magento\Framework\DataObjectFactory $dataObjectFactory,
+        \Magento\Framework\Event\ManagerInterface $eventManager
     ) {
         $this->cache = $cache;
         $this->collectionFactory = $collectionFactory;
         $this->serializer = $serializer;
         $this->dataObjectFactory = $dataObjectFactory;
+        $this->eventManager = $eventManager;
     }
 
     public function aroundGetFilesCollection(\Magento\Cms\Model\Wysiwyg\Images\Storage $subject, callable $proceed, $path, $type = null)
     {
-        $cacheKey = md5($path . $type);
-
+        $cacheKey = hash('md5', $path . $type);
         $collectionItemsData = $this->cache->load($cacheKey);
 
         if ($collectionItemsData == null) {
             $collection = $proceed($path, $type);
-
             $this->cache->save(
                 $this->serializeCollectionItemsData($collection),
                 $cacheKey,
@@ -64,34 +54,36 @@ class CacheFilesCollection
 
     public function afterUploadFile(\Magento\Cms\Model\Wysiwyg\Images\Storage $subject, $result)
     {
-        $this->cache->clean(\Zend_Cache::CLEANING_MODE_MATCHING_TAG, [self::FILES_COLLECTION_TAG]);
+        $this->eventManager->dispatch('media_gallery_upload');
 
         return $result;
     }
 
     public function afterDeleteFile(\Magento\Cms\Model\Wysiwyg\Images\Storage $subject, $result)
     {
-        $this->cache->clean(\Zend_Cache::CLEANING_MODE_MATCHING_TAG, [self::FILES_COLLECTION_TAG]);
+        $this->eventManager->dispatch('media_gallery_upload');
 
         return $result;
     }
 
     public function afterCreateDirectory(\Magento\Cms\Model\Wysiwyg\Images\Storage $subject, $result)
     {
-        $tags = [\MageSuite\MediaListingCache\Plugin\Cms\Block\Adminhtml\Wysiwyg\Images\Tree\CacheTreeJson::TREE_JSON_TAG];
-
-        $this->cache->clean(\Zend_Cache::CLEANING_MODE_MATCHING_TAG, $tags);
+        $this->cleanImagesTreeCache();
 
         return $result;
     }
 
     public function afterDeleteDirectory(\Magento\Cms\Model\Wysiwyg\Images\Storage $subject, $result)
     {
-        $tags = [\MageSuite\MediaListingCache\Plugin\Cms\Block\Adminhtml\Wysiwyg\Images\Tree\CacheTreeJson::TREE_JSON_TAG];
-
-        $this->cache->clean(\Zend_Cache::CLEANING_MODE_MATCHING_TAG, $tags);
+        $this->cleanImagesTreeCache();
 
         return $result;
+    }
+
+    protected function cleanImagesTreeCache(): void
+    {
+        $tags = [\MageSuite\MediaListingCache\Plugin\Cms\Block\Adminhtml\Wysiwyg\Images\Tree\CacheTreeJson::TREE_JSON_TAG];
+        $this->cache->clean(\Zend_Cache::CLEANING_MODE_MATCHING_TAG, $tags);
     }
 
     protected function unserializeCollectionItemsData($serializedData)
@@ -112,7 +104,8 @@ class CacheFilesCollection
     protected function serializeCollectionItemsData($collection)
     {
         $serializer = $this->serializer;
-        $items = array_map(function ($item) use ($serializer){
+        // phpcs:disable Standard.Classes.RequireFullPath
+        $items = array_map(function ($item) use ($serializer) {
             return $serializer->serialize($item->getData());
         }, $collection->getItems());
 

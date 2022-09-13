@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="media_gallery_upload">
+        <observer name="clean_cache_after_file_upload" instance="MageSuite\MediaListingCache\Observer\CleanCacheAfterFileUpload"/>
+    </event>
+</config>
