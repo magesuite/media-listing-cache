@@ -3,6 +3,9 @@
     <type name="Magento\Cms\Model\Wysiwyg\Images\Storage">
         <plugin name="cache_files_collection" type="MageSuite\MediaListingCache\Plugin\Cms\Model\Wysiwyg\Images\Storage\CacheFilesCollection" sortOrder="10" />
     </type>
+    <type name="Magento\MediaGalleryUi\Model\Listing\DataProvider">
+        <plugin name="cache_files_listing" type="MageSuite\MediaListingCache\Plugin\MediaGalleryUi\Model\Listing\DataProvider\CacheFilesListing" sortOrder="10" />
+    </type>
 
     <type name="Magento\Cms\Block\Adminhtml\Wysiwyg\Images\Tree">
         <plugin name="cache_tree_json" type="MageSuite\MediaListingCache\Plugin\Cms\Block\Adminhtml\Wysiwyg\Images\Tree\CacheTreeJson" sortOrder="10" />
