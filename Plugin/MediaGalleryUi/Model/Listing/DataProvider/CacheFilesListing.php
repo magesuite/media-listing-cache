@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MageSuite\MediaListingCache\Plugin\MediaGalleryUi\Model\Listing\DataProvider;
 
 class CacheFilesListing
