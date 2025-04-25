@@ -6,32 +6,29 @@ namespace MageSuite\MediaListingCache\Plugin\MediaGalleryUi\Model\Listing\DataPr
 
 class CacheFilesListing
 {
-    const ONE_DAY = 86400;
-
-    protected \MageSuite\MediaListingCache\Model\Cache\Type\MediaListing $cache;
+    protected const ONE_DAY = 86400;
 
     public function __construct(
-        \MageSuite\MediaListingCache\Model\Cache\Type\MediaListing $cache
-    ) {
-        $this->cache = $cache;
-    }
+        protected \MageSuite\MediaListingCache\Model\Cache\Type\MediaListing $cache,
+        protected \Magento\Framework\Serialize\SerializerInterface $serializer,
+        protected \MageSuite\MediaListingCache\Model\Cache\CacheKeyGenerator $cacheKeyGenerator
+    ) {}
 
     public function aroundGetData(\Magento\MediaGalleryUi\Model\Listing\DataProvider $subject, callable $proceed): array
     {
-        $key = serialize($subject->getSearchCriteria());
-        $cacheKey = hash('md5', $key);
+        $cacheKey = $this->cacheKeyGenerator->generate($subject->getSearchCriteria());
         $data = $this->cache->load($cacheKey);
 
         if (!$data) {
             $data = $proceed();
             $this->cache->save(
-                serialize($data),
+                $this->serializer->serialize($data),
                 $cacheKey,
                 [\MageSuite\MediaListingCache\Plugin\Cms\Model\Wysiwyg\Images\Storage\CacheFilesCollection::FILES_COLLECTION_TAG],
                 self::ONE_DAY
             );
         } else {
-            $data = unserialize($data);
+            $data = $this->serializer->unserialize($data);
         }
 
         return $data;

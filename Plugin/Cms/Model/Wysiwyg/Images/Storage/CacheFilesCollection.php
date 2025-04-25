@@ -9,13 +9,9 @@ class CacheFilesCollection
     const FILES_COLLECTION_TAG = 'files_collection';
 
     protected \MageSuite\MediaListingCache\Model\Cache\Type\MediaListing $cache;
-
     protected \Magento\Framework\Data\CollectionFactory $collectionFactory;
-
     protected \Magento\Framework\Serialize\SerializerInterface $serializer;
-
     protected \Magento\Framework\DataObjectFactory $dataObjectFactory;
-
     protected \Magento\Framework\Event\ManagerInterface $eventManager;
 
     public function __construct(
