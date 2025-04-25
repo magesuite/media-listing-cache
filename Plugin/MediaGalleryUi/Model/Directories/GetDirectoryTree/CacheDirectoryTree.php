@@ -9,13 +9,10 @@ class CacheDirectoryTree
     const TYPE_IDENTIFIER = 'new_media_gallery_directory_tree';
     const TWO_WEEKS_IN_SECONDS = 1209600;
 
-    protected \MageSuite\MediaListingCache\Model\Cache\Type\MediaListing $cache;
-
     public function __construct(
-        \MageSuite\MediaListingCache\Model\Cache\Type\MediaListing $cache
-    ) {
-        $this->cache = $cache;
-    }
+        protected \MageSuite\MediaListingCache\Model\Cache\Type\MediaListing $cache,
+        protected \Magento\Framework\Serialize\SerializerInterface $serializer
+    ) {}
 
     public function aroundExecute(\Magento\MediaGalleryUi\Model\Directories\GetDirectoryTree $subject, callable $proceed): array
     {
@@ -25,13 +22,13 @@ class CacheDirectoryTree
         if (!$data) {
             $data = $proceed();
             $this->cache->save(
-                serialize($data),
+                $this->serializer->serialize($data),
                 $identifier,
                 [\MageSuite\MediaListingCache\Model\Cache\Type\MediaListing::CACHE_TAG],
                 self::TWO_WEEKS_IN_SECONDS
             );
         } else {
-            $data = unserialize($data);
+            $data = $this->serializer->unserialize($data);
         }
 
         return $data;
