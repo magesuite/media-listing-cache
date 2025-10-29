@@ -20,18 +20,4 @@
             sortOrder="100"
         />
     </type>
-    <type name="Magento\MediaGalleryUi\Controller\Adminhtml\Directories\Create">
-        <plugin
-            name="flush_directory_tree_cache_after_creating_directory"
-            type="MageSuite\MediaListingCache\Plugin\MediaGalleryUi\Controller\Adminhtml\Directories\Create\FlushDirectoryTreeCache"
-            sortOrder="100"
-        />
-    </type>
-    <type name="Magento\MediaGalleryUi\Controller\Adminhtml\Directories\Delete">
-        <plugin
-            name="flush_directory_tree_cache_after_deleting_directory"
-            type="MageSuite\MediaListingCache\Plugin\MediaGalleryUi\Controller\Adminhtml\Directories\Delete\FlushDirectoryTreeCache"
-            sortOrder="100"
-        />
-    </type>
 </config>
