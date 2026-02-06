@@ -96,7 +96,7 @@ class CacheKeyGeneratorTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($expectedKey, $cacheKey);
     }
 
-    protected function paginationDataProvider(): array
+    public static function paginationDataProvider(): array
     {
         return [
             'Page 1, Limit 10' => [1, 10, 'f5878ccba90680eba8ab184348deb723'],
