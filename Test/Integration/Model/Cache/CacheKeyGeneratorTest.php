@@ -73,9 +73,7 @@ class CacheKeyGeneratorTest extends \PHPUnit\Framework\TestCase
         ]));
     }
 
-    /**
-     * @dataProvider paginationDataProvider
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('paginationDataProvider')]
     public function testItGeneratesProperCacheKeyOnPageChange(int $currentPage, int $pageSize, string $expectedKey): void
     {
         $filterEntityId = $this->filterBuilder->setField('entity_id')
